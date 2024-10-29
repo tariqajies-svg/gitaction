@@ -12,7 +12,7 @@
     },
     "version": "2.4.3",
     "require": {
-        "magento/product-community-edition": "2.4.3",
+        "magento/product-community-edition": "^2.4.3",
         "magento/composer-root-update-plugin": "~1.1",
         "magento/composer-dependency-version-audit-plugin": "~0.1"
     },
@@ -25,7 +25,7 @@
         "files": [
             "app/etc/NonComposerComponentRegistration.php"
         ],
-        "psr-0": {
+        "psr-4": {
             "": [
                 "app/code/",
                 "generated/code/"
