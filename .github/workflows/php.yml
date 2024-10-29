@@ -1,39 +1,40 @@
-name: PHP Composer
-
+name: Code Analysis and Security Assesment
+ 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
-
+    branches:
+      - development
+ 
+defaults:
+  run:
+    working-directory: /var/www/vhosts/www.strollay.com/gitaction
+ 
+env:
+  CHANGE_BRANCH: ${{ github.event.pull_request.head.ref }}
+  CHANGE_TARGET: ${{ github.event.pull_request.base.ref }}
+ 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  php_static_analysis:
+    runs-on: gstech
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
-
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-
-    # - name: Run test suite
-    #   run: composer run-script test
+      - name: Checkout Target repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+      - name: Checkout Source repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Set CHANGED_FILES
+        run: |
+          cd $GITHUB_WORKSPACE
+          echo 'pwd'
+          changedFiles=$(git diff --name-only --diff-filter=ACMRT origin/${{ env.CHANGE_TARGET }}...origin/${{ env.CHANGE_BRANCH }})
+          if [ ! -z "$changedFiles" ]; then
+          CHANGED_FILES=$(echo "$changedFiles" | awk '{printf " --files %s", $0}')
+          echo "CHANGED_FILES=${CHANGED_FILES}" >> $GITHUB_ENV
+          else
+            echo "No changed files in the pull request"
+            echo "CHANGED_FILES=" >> $GITHUB_ENV
+          fi
+          echo $CHANGED_FILES
