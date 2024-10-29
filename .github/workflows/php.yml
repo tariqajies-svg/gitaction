@@ -29,6 +29,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           echo 'pwd'
+          git fetch
           changedFiles=$(git diff --name-only --diff-filter=ACMRT origin/${{ env.CHANGE_TARGET }}...origin/${{ env.CHANGE_BRANCH }})
           if [ ! -z "$changedFiles" ]; then
           CHANGED_FILES=$(echo "$changedFiles" | awk '{printf " --files %s", $0}')
